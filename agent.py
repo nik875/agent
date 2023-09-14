@@ -42,7 +42,7 @@ class AutonomousAgent:
         self.long_term_memory = LongTermMemory(100, OPENAI_API_KEY)
 
         # Create a PlanningModule object with a generator and a critic LLMAgent
-        self.planning_module = PlanningModule(api_key=OPENAI_API_KEY)
+        self.planning_module = PlanningModule(OPENAI_API_KEY, self.action_module.action_dict)
 
         # Generate a plan using the provided objective
         self.planning_module.generate_plan(objective)
@@ -134,7 +134,10 @@ class AutonomousAgent:
             if not continuous:
                 print(f"Planned Action: {selected_action}")
                 print(f"Stored Arguments: {arguments}")
-                input("Press Enter to confirm...")
+                fb = input("Press Enter to confirm, or provide human feedback: ")
+                if fb:
+                    self.feedback(f"Action was not performed. Human feedback: {fb}")
+                    continue
 
             # Call callable_fn on the generated arguments
             try:

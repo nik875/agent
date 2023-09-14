@@ -39,7 +39,7 @@ class LongTermMemory:
         nearest_embedding = list(self.embedding_to_text.keys())[index[0, 0]]
         text_result = self.embedding_to_text[nearest_embedding]
 
-        return nearest_embedding
+        return text_result
 
     def clear_memory(self):
         self.memory_deque.clear()

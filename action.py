@@ -15,7 +15,7 @@ class ActionModule:
         self.action_dict = {
             "read_file": (self.read_file, 1, "Read the content of a file. Argument: (path)"),
             "write_file": (self.write_file, 2, "Write data to a file. Arguments: (path, data)"),
-            "browse_url": (self.browse_url, 1, "Access a URL and retrieve its content. Argument: (url)"),
+            "browse_url": (self.browse_url, 1, "Access a URL and retrieve its content. If this fails, consider browsing another site from the search results. Argument: (url)"),
             "search_web": (self.search_web, 1, "Perform a web search and return results. Argument: (query)"),
             "run_command": (self.run_command, 1, "Run a shell command and return output. Argument: (cmd)"),
             "present_result": (self.present_result, 1, "Output a result to the user. Argument: (result)"),
@@ -59,15 +59,11 @@ class ActionModule:
         Access the given URL, download the content, pass it through output_mgmt, and return it.
         """
         # Send an HTTP GET request to the URL
-        response = requests.get(url)
-
-        # Check if the request was successful
-        if response.status_code == 200:
-            # Pass the content through output_mgmt
-            return self.output_mgmt(response.text)
-        else:
-            # Return the exception text if the request fails
-            return f"Failed to access URL: {url}. Status code: {response.status_code}"
+        try:
+            response = requests.get(url)
+            return self.output_mgmt(response)
+        except Exception as e:
+            return self.output_mgmt(f'Error browsing url: {str(e)}')
 
     def search_web(self, query):
         """
@@ -78,10 +74,10 @@ class ActionModule:
             f'key={self.google_custom_search_api_key}&' \
             f'cx={self.google_custom_search_engine_id}&' \
             f'q={urllib.parse.quote_plus(query)}'
-        response = requests.get(url).json()
 
         # Check if the request was successful
-        if response.status_code == 200:
+        try:
+            response = requests.get(url)
             # Parse the search results
             data = response.json()
             items = data.get("items", [])
@@ -95,9 +91,9 @@ class ActionModule:
 
             # Pass the formatted results through output_mgmt
             return self.output_mgmt(result_string)
-        else:
+        except Exception as e:
             # Return the exception text if the request fails
-            return f"Failed to perform the web search. Status code: {response.status_code}"
+            return self.output_mgmt(f"Failed to perform the web search. Error: {str(e)}")
 
     def run_command(self, cmd):
         """
@@ -122,7 +118,7 @@ class ActionModule:
             return self.output_mgmt(output)
         except Exception as e:
             # Return the exception text if an error occurs
-            return f"Error running the command: {str(e)}"
+            return self.output_mgmt(f"Error running the command: {str(e)}")
 
     def present_result(self, text):
         """
