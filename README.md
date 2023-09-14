@@ -1,8 +1,14 @@
-As a professional python developer and artifiical intelligence expert, help me develop a fully autonomous intelligent agent based on existing libraries that i've built.
+# Autonomous Agent
 
-Create a new AutonomousAgent class with the following structure:
+To use, it's necessary to create a creds.py file with the following content:
 
-- openai api key at the top of the file, as well as google api key and google custom search id
+
+OPENAI_API_KEY = 'your-key-here'
+GOOGLE_API_KEY = 'your-key-here'
+GOOGLE_CUSTOM_SEARCH_ENGINE_ID = 'your-engine-id-here'
+
+terrible documentation:
+
 - init(objective):
     - create a new llm agent with objective: "understand natural language instructions, find relevant memories, generate actions, and generate insights from the whole process. the following are allowed actions: {insert_actions}. to find memories, generate a short set of search terms (e.g. to find memories about installing the openai package, search for 'python package install openai pip'). to generate insights, analyze the previous action and its feedback and write a single-sentence lesson that can be learned from what happened, including keyword terms that can be used to find this memory later." this is the executor.
     - also create a PlanningModule object using the api key.
@@ -22,5 +28,3 @@ Create a new AutonomousAgent class with the following structure:
     - plan.feedback(result of action)
     - executor: given this {feedback} and everything else that happened over the course of the previous action, generate a major insight to save for the future.
     - memory.add_memory(insight)
-
-Do not write any of the code. Only create the basic class structure with methods, and add in all the intended functionality as comments. We will fill these in one by one, step by step, together.
