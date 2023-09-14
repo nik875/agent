@@ -2,15 +2,16 @@ from collections import deque
 import openai
 import numpy as np
 from sklearn.neighbors import BallTree
+from llm import LLMAgent
+from profiler import parse_generation
 
-class LongTermMemory:
-    def __init__(self, max_size, api_key, model="text-embedding-ada-002"):
+class MemoryModule:
+    def __init__(self, profile, max_size=100, model="text-embedding-ada-002"):
+        self.model = LLMAgent(profile)
+        self.embed_model = model
         self.max_size = max_size
         self.memory_deque = deque()
         self.embedding_to_text = {}
-        self.api_key = api_key
-        self.model = model
-        openai.api_key = self.api_key  # Initialize the OpenAI client in the constructor
         self.tree = None  # BallTree for nearest neighbor search
 
     def add_memory(self, text):
@@ -41,17 +42,33 @@ class LongTermMemory:
 
         return text_result
 
+    def relevant_memory(self, planned_step):
+        generation = self.model.prompt(f"""
+Find the most relevant memory for this planned action:
+$PLANNED_ACTION: {planned_step}
+""")
+        as_dict = parse_generation(generation)
+        return self.find_memory(as_dict['MAIN_CONTENT'])
+
+    def gen_memory(self, attempted_step, attempted_action, result, feedback):
+        insight = self.model.prompt(f"""
+Given the following information, generate a valuable insight that could help future planning.
+$ATTEMPTED_STEP: {attempted_step}
+$ATTEMPTED_ACTION: {attempted_action}
+$RESULT_OF_ACTION: {result}
+$FEEDBACK: {str(feedback)}
+        """)
+        as_dict = parse_generation(insight)
+        self.add_memory(as_dict['MAIN_CONTENT'])
+
     def clear_memory(self):
         self.memory_deque.clear()
         self.embedding_to_text.clear()
         self.tree = None
 
     def get_embedding(self, text):
-        text = text.replace("\n", " ")
-        embedding_data = openai.Embedding.create(input=[text], model=self.model)['data'][0]
+        text = text.replace("\n", " ") if text else ''
+        embedding_data = openai.Embedding.create(input=[text], model=self.embed_model)['data'][0]
         embedding = np.array(embedding_data['embedding'])
         return embedding
 
-# Example usage:
-# Replace 'YOUR_API_KEY' with your actual OpenAI API key
-#memory = LongTermMemory(max_size=100, api_key='YOUR_API_KEY')

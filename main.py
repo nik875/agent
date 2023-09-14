@@ -1,6 +1,6 @@
-from agent import AutonomousAgent
+from agent import Agent
 
 
 if __name__ == '__main__':
-    a = AutonomousAgent('Generate a summary of the current CRISPR research.')
+    a = Agent("Create a HTML/CSS site that's appealing and talks about the environment.")
     a.run()

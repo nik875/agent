@@ -1,20 +1,21 @@
 from collections import deque
 import openai
 import tiktoken
-from mem import LongTermMemory
+from creds import OPENAI_API_KEY
 
 
 class LLMAgent:
-    def __init__(self, api_key, max_context_len=4097):
+    def __init__(self, role, max_context_len=4097):
         """
         Initialize the OpenAI API with the provided key.
         """
-        openai.api_key = api_key
-        self.messages = deque()
-        self.objective = None
+        openai.api_key = OPENAI_API_KEY
+        self.role = role
+        self.messages = deque([{'role': 'system', 'content': self.role}])
         self.max_context_len = max_context_len
 
     def num_tokens_from_messages(self, model="gpt-3.5-turbo-0613"):
+        # pylint: disable=line-too-long
         """
         Return the number of tokens used by a list of messages.
         src: https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
@@ -57,31 +58,16 @@ class LLMAgent:
         num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
         return num_tokens
 
-    def create_agent(self, objective):
-        """
-        Given a high-level objective, create a fresh LLM instance to generate an appropriate role for the agent.
-        """
-        self.messages.append({"role": "user", "content": f"Briefly define a role for an agent to accomplish the objective: {objective}. Do not repeat any information provided in the objective."})
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=list(self.messages)
-        )
-        role = response.choices[0].message['content']
-        print(f'Created new agent with objective: {objective}.\n Role: {role}')
-        self.messages.append({"role": "assistant", "content": role})
-        while self.num_tokens_from_messages() > self.max_context_len:
-            self.messages.popleft()
-        return role
-
-    def prompt_agent(self, prompt):
+    def prompt(self, prompt):
         """
         Given a prompt, format it correctly and ask the agent to generate a response.
         """
-        # Remind the model of its role and the overarching objective
-        self.messages.append({"role": "system", "content": f"You are an agent with the role: {self.messages[-1]['content']}. Your overarching objective is: {self.objective}"})
         self.messages.append({"role": "user", "content": prompt})
         while self.num_tokens_from_messages() > self.max_context_len:
             self.messages.popleft()
+            self.messages.popleft()
+            # Remind the model of its role and the overarching objective
+            self.messages.appendleft({'role': 'system', 'content': self.role})
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=list(self.messages)
@@ -90,8 +76,3 @@ class LLMAgent:
         self.messages.append({"role": "assistant", "content": agent_response})
         return agent_response
 
-# Example usage:
-# agent = AutonomousAgent("YOUR_OPENAI_API_KEY")
-# agent.create_agent("Write a Python class")
-# response = agent.prompt_agent("How do I start?")
-# print(response)
