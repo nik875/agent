@@ -1,6 +1,8 @@
+import urllib
 import requests
 import subprocess
 import tiktoken
+from googleapiclient.discovery import build
 
 class ActionModule:
     def __init__(self, max_token_length, google_custom_search_api_key, google_custom_search_engine_id):
@@ -10,6 +12,14 @@ class ActionModule:
         self.max_token_length = max_token_length
         self.google_custom_search_api_key = google_custom_search_api_key
         self.google_custom_search_engine_id = google_custom_search_engine_id
+        self.action_dict = {
+            "read_file": (self.read_file, 1, "Read the content of a file. Argument: (path)"),
+            "write_file": (self.write_file, 2, "Write data to a file. Arguments: (path, data)"),
+            "browse_url": (self.browse_url, 1, "Access a URL and retrieve its content. Argument: (url)"),
+            "search_web": (self.search_web, 1, "Perform a web search and return results. Argument: (query)"),
+            "run_command": (self.run_command, 1, "Run a shell command and return output. Argument: (cmd)"),
+            "present_result": (self.present_result, 1, "Output a result to the user. Argument: (result)"),
+        }
 
     def output_mgmt(self, result):
         """
@@ -24,6 +34,7 @@ class ActionModule:
         if tokens > self.max_token_length:
             raise Exception(f"Output token length ({tokens}) exceeds the maximum allowed ({self.max_token_length})")
         
+        print(f'DEBUG: action output: {result}')
         return result
 
     def read_file(self, path):
@@ -62,16 +73,11 @@ class ActionModule:
         """
         Perform a web search using Google's Custom Search API and return the results as a formatted string.
         """
-        # Define the Custom Search API endpoint and parameters
-        base_url = "https://www.googleapis.com/customsearch/v1"
-        params = {
-            "key": self.google_custom_search_api_key,
-            "q": query,
-            "cx": self.google_custom_search_engine_id,
-        }
-
-        # Send a GET request to the Custom Search API
-        response = requests.get(base_url, params=params)
+        url = f"https://www.googleapis.com/customsearch/v1?key={self.google_custom_search_api_key}"\
+            f"&cx={self.google_custom_search_engine_id}&q={query}"
+        url = urllib.parse.quote_plus(url)
+        response = requests.get(url).json()
+        breakpoint()
 
         # Check if the request was successful
         if response.status_code == 200:
@@ -116,3 +122,9 @@ class ActionModule:
         except Exception as e:
             # Return the exception text if an error occurs
             return f"Error running the command: {str(e)}"
+
+    def present_result(self, text):
+        """
+        Print the result to the user. This is an objective completion method.
+        """
+        print(text)

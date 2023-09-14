@@ -23,18 +23,21 @@ class LongTermMemory:
             del self.embedding_to_text[oldest_embedding]
 
         # Add the new memory to the dictionary
-        self.embedding_to_text[embedding] = text
+        self.embedding_to_text[tuple(embedding)] = text
 
         # Rebuild the BallTree
         embeddings = list(self.embedding_to_text.keys())
-        self.tree = BallTree(embeddings, metric='cosine')
+        self.tree = BallTree(embeddings)
 
     def find_memory(self, query_text):
+        if not self.tree:
+            return 'No relevant memories'
         query_embedding = self.get_embedding(query_text)
 
         # Query the BallTree for the nearest neighbor
         _, index = self.tree.query([query_embedding], k=1)
-        nearest_embedding = self.embedding_to_text[tuple(self.tree.data[index[0]])]
+        nearest_embedding = list(self.embedding_to_text.keys())[index[0, 0]]
+        text_result = self.embedding_to_text[nearest_embedding]
 
         return nearest_embedding
 
