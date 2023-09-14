@@ -80,6 +80,8 @@ class LLMAgent:
         # Remind the model of its role and the overarching objective
         self.messages.append({"role": "system", "content": f"You are an agent with the role: {self.messages[-1]['content']}. Your overarching objective is: {self.objective}"})
         self.messages.append({"role": "user", "content": prompt})
+        while self.num_tokens_from_messages() > self.max_context_len:
+            self.messages.popleft()
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=list(self.messages)

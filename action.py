@@ -73,25 +73,26 @@ class ActionModule:
         """
         Perform a web search using Google's Custom Search API and return the results as a formatted string.
         """
-        url = f"https://www.googleapis.com/customsearch/v1?key={self.google_custom_search_api_key}"\
-            f"&cx={self.google_custom_search_engine_id}&q={query}"
-        url = urllib.parse.quote_plus(url)
+        query = query.replace('"', '')
+        url = f'https://www.googleapis.com/customsearch/v1?' \
+            f'key={self.google_custom_search_api_key}&' \
+            f'cx={self.google_custom_search_engine_id}&' \
+            f'q={urllib.parse.quote_plus(query)}'
         response = requests.get(url).json()
-        breakpoint()
 
         # Check if the request was successful
         if response.status_code == 200:
             # Parse the search results
             data = response.json()
             items = data.get("items", [])
-            
+
             # Format the search results as a numbered list with URLs and descriptions
             result_string = ""
             for i, item in enumerate(items, start=1):
                 url = item.get("link", "")
                 description = item.get("snippet", "")
                 result_string += f"{i}. URL: {url}\n   Description: {description}\n\n"
-            
+
             # Pass the formatted results through output_mgmt
             return self.output_mgmt(result_string)
         else:
