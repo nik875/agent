@@ -60,6 +60,7 @@ $FEEDBACK: {str(feedback)}
         """)
         as_dict = parse_generation(insight)
         self.add_memory(as_dict['MAIN_CONTENT'])
+        return as_dict['MAIN_CONTENT']
 
     def clear_memory(self):
         self.memory_deque.clear()

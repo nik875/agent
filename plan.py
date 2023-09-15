@@ -17,8 +17,19 @@ class PlanningModule:
 Generate a plan to accomplish your $OBJECTIVE. Consider the following feedback:\n
 {feedback if feedback else 'No feedback'}.
 If you had a previous plan, prioritize revising it over writing a new one from scratch.
+Start with a single-step plan where the only step is the $OBJECTIVE:
         """
         generation = self.model.prompt(prompt)
+        for _ in range(7):
+            new_generation = self.model.prompt("""
+Now determine whether the steps are specific enough. If so, respond with END. If not, rewrite the
+plan with one additional step:
+            """)
+            if 'END' in new_generation:
+                break
+            generation = new_generation
+            print(generation)
+            print('-'*20)
         self.raw_plan = parse_generation(generation)['MAIN_CONTENT']
         self.plan = collections.deque()
         for line in self.raw_plan.strip().split('\n'):

@@ -37,7 +37,7 @@ class Agent:
                     result = f'Action not completed due to user intervention. User feedback: {fb}'
             if not result:
                 result = self.system.do(planned_action)
-            print('Finished action execution')
+            print(f'Result of execution: {result}')
             feedback = self.feedback_module.feedback(next_step, planned_action, result)
             print(f'Feedback: {feedback}')
             if feedback.obj_complete:

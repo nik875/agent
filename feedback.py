@@ -42,7 +42,6 @@ $CURRENT_PLAN: {self.planning_module.raw_plan}
         )
         new_mem = self.memory_module.gen_memory(attempted_step, attempted_action, result, feedback)
         feedback.new_mem = new_mem
-        self.memory_module.add_memory(new_mem)
         if feedback.revise_plan:
             self.planning_module.gen_plan(feedback)
         return feedback
