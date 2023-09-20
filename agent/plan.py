@@ -4,7 +4,8 @@ from .llm import LLMWrapper
 
 class PlanningModule:
     def __init__(self, profile):
-        self.model = LLMWrapper(profile)
+        self.plan_generator = LLMWrapper(profile[0])
+        self.plan_criticizer = LLMWrapper(profile[1])
         self.plan = collections.deque()
         self.done = collections.deque()
         self.raw_plan = ''
@@ -22,33 +23,36 @@ class PlanningModule:
     def parse_plan(self, raw_plan):
         plan = collections.deque()
         for line in raw_plan.strip().split('\n'):
-            expected_header = f'Step {len(plan)+1}: '
+            expected_header = f'Step {len(plan)}: '
             if line.startswith(expected_header):
                 plan.append(line.lstrip(expected_header))
         return plan
 
     def gen_plan(self, feedback='No feedback'):
-        generation = self.model.prompt(
+        generation = self.plan_generator.prompt(
             feedback=feedback,
-            old_plan=self.done + self.plan if self.done or self.plan else 'No old plan',
-            broadness_levels=['too specific', 'too general', 'just right']
+            completed_steps=self.done,
+            old_plan=self.plan,
         )
         self.raw_plan = generation['MAIN_CONTENT']
         self.plan = self.parse_plan(self.raw_plan)
         print('Initial plan:')
         print(self.raw_plan)
         for _ in range(7):
-            if generation['END'] == 'just right':
-                break
-            print(f"Plan was {generation['END']}")
             print('Refining plan...')
-            generation = self.model.prompt(
-                feedback=f"The last plan was {generation['END']}. Adjust accordingly.",
-                old_plan=self.done + self.plan if self.done or self.plan else 'No old plan',
-                broadness_levels=['too specific', 'too general', 'just right']
+            feedback = self.plan_criticizer.prompt(
+                completed_steps=self.done,
+                plan=self.plan,
             )
+            print('Feedback: ' + feedback['MAIN_CONTENT'])
+            generation = self.plan_generator.prompt(
+                feedback=feedback['MAIN_CONTENT'],
+                completed_steps=self.done,
+                old_plan=self.plan,
+            )
+            print(generation)
             self.raw_plan = generation['MAIN_CONTENT']
             self.plan = self.parse_plan(self.raw_plan)
-            print(self.raw_plan)
+            #print(self.raw_plan)
             print('-'*20)
 

@@ -21,18 +21,24 @@ class FeedbackModule:
         self.memory_module = memory_module
         self.model = LLMWrapper(profile)
 
-    def feedback(self, attempted_step, attempted_action, result):
+    def feedback(self, attempted_action, result):
+        attempted_step = self.planning_module.plan.popleft()
+        self.planning_module.done.append(attempted_step)
         raw_feedback = self.model.prompt(
             attempted_step=attempted_step,
             attempted_action=attempted_action,
             result=result,
-            current_plan=self.planning_module.done + self.planning_module.plan
+            completed_steps=self.planning_module.done,
+            current_plan=self.planning_module.plan
         )
         feedback = Feedback(
             raw_feedback['STEP_COMPLETE'] == 'True',
             raw_feedback['REVISE_PLAN'] == 'True',
             raw_feedback['MAIN_CONTENT']
         )
+        if not feedback.step_complete:
+            self.planning_module.plan.appendleft(attempted_step)
+            self.planning_module.done.pop()
         new_mem = self.memory_module.gen_memory(attempted_step, attempted_action, result, feedback)
         feedback.new_mem = new_mem
         if feedback.revise_plan:

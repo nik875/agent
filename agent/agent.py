@@ -38,9 +38,7 @@ class Agent:
             if not result:
                 result = self.system.do(planned_action)
             print(f'Result of execution: {result}')
-            feedback = self.feedback_module.feedback(current_step, planned_action, result)
+            feedback = self.feedback_module.feedback(planned_action, result)
             print(f'Feedback: {feedback}')
-            if feedback.step_complete:
-                self.planning_module.next_step()
         print('Objective complete! Exiting.')
 

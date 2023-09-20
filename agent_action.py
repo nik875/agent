@@ -1,4 +1,4 @@
 import os
 
-# Create a new directory called "Python Tutorial"
-os.mkdir("Python Tutorial")
+# Move into the "Python Course" directory
+os.chdir("Python Course")
