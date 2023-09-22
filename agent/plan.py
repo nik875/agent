@@ -29,6 +29,7 @@ class PlanningModule:
         return plan
 
     def gen_plan(self, feedback='No feedback'):
+        print('Generating plan...')
         generation = self.plan_generator.prompt(
             feedback=feedback,
             completed_steps=self.done,
@@ -36,8 +37,6 @@ class PlanningModule:
         )
         self.raw_plan = generation['MAIN_CONTENT']
         self.plan = self.parse_plan(self.raw_plan)
-        print('Initial plan:')
-        print(self.raw_plan)
         for _ in range(7):
             print('Refining plan...')
             feedback = self.plan_criticizer.prompt(
@@ -50,9 +49,8 @@ class PlanningModule:
                 completed_steps=self.done,
                 old_plan=self.plan,
             )
-            print(generation)
             self.raw_plan = generation['MAIN_CONTENT']
             self.plan = self.parse_plan(self.raw_plan)
-            #print(self.raw_plan)
-            print('-'*20)
+        print('New plan:')
+        print(self.plan)
 
