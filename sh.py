@@ -1,11 +1,13 @@
 import os
 import subprocess
 from parse import CommandParser
+from chatbot import Chatbot
 
 
 class Shell:
     def __init__(self):
         self.parser = CommandParser()
+        self.chatbot = Chatbot()
 
     def repl(self):
         while True:
@@ -18,17 +20,24 @@ class Shell:
                     directory = parts[1]
                     os.chdir(directory)
                 continue
-            parsed = self.parser.command(cmd)
-            if parsed['natural_language'] == 'True':
+            if 'AGENT:' in cmd:
+                prompt = cmd[cmd.find('AGENT:')+len('AGENT:')+1:]
                 subprocess.run(['python',
                                 '/home/nikhilk/Documents/Personal/smartshell/run_agent.py',
-                                f'"{cmd}"'], check=False)
+                                f'"{prompt}"'], check=True)
                 continue
-            if parsed['valid'] == 'False':
+            parsed = self.parser.command(cmd)
+            if parsed == 'Chat':
+                print(self.chatbot.ask(cmd))
+                continue
+            if parsed != 'Low-risk command' and parsed['valid'] == 'False':
                 print(parsed['reasoning'])
                 if input('Are you sure you want to execute? (y/n): ') != 'y':
                     continue
-            subprocess.run(cmd.split(), check=False)
+            try:
+                subprocess.run(cmd, shell=True, check=True)
+            except subprocess.CalledProcessError:
+                continue
 
 
 if __name__ == '__main__':
