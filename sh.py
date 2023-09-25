@@ -5,6 +5,7 @@ import subprocess
 import curses
 from parse import CommandParser
 from chatbot import Chatbot
+from agent.agent import Agent
 
 
 def handle_backspace(response, stdscr):
@@ -65,9 +66,10 @@ class Shell:
             return False
         if 'AGENT:' in cmd:
             prompt = cmd[cmd.find('AGENT:')+len('AGENT:')+1:]
-            subprocess.run(['python',
-                            '/home/nikhilk/Documents/Personal/smartshell/run_agent.py',
-                            f'"{prompt}"'], check=True)
+            curses.endwin()
+            ag = Agent(prompt)
+            ag.run()
+            curses.newwin()
             return False
         parsed = self.parser.command(cmd)
         if parsed == 'Chat':

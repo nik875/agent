@@ -2,7 +2,6 @@ import os
 import subprocess
 import urllib
 import requests
-from .creds import WORKING_DIRECTORY
 
 
 def search_web(self, query):
@@ -39,7 +38,7 @@ def search_web(self, query):
 
 class ExternalHandler:
     def __init__(self):
-        self.working_directory = WORKING_DIRECTORY
+        self.working_directory = os.getcwd()
 
     def do(self, action):
         if 'cd' in action:

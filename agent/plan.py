@@ -37,13 +37,12 @@ class PlanningModule:
         )
         self.raw_plan = generation['MAIN_CONTENT']
         self.plan = self.parse_plan(self.raw_plan)
-        for _ in range(7):
+        for _ in range(3):
             print('Refining plan...')
             feedback = self.plan_criticizer.prompt(
                 completed_steps=self.done,
                 plan=self.plan,
             )
-            print('Feedback: ' + feedback['MAIN_CONTENT'])
             generation = self.plan_generator.prompt(
                 feedback=feedback['MAIN_CONTENT'],
                 completed_steps=self.done,
@@ -52,5 +51,6 @@ class PlanningModule:
             self.raw_plan = generation['MAIN_CONTENT']
             self.plan = self.parse_plan(self.raw_plan)
         print('New plan:')
-        print(self.plan)
+        for idx, val in enumerate(self.plan):
+            print(f"Step {idx}: {val}")
 
