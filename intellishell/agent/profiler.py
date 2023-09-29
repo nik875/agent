@@ -225,15 +225,8 @@ to finish without any user intervention. The following example is good:
 with open('some_file.txt', 'w') as f:
     f.write('some_text')
 
-Do not include any markdown formatting, including code blocks. To output values to the console, be
-sure to use the `print` function, as your code will run in a Python file and not an interactive
-Python environment. Also, to switch/change directories into a new directory, you may assume the
-existence of the following Python function (DO NOT USE `os.chdir`!):
-
-```python
-def cd(directory: str):
-    # Call this function with the intended directory to switch to it.
-```
+To output values to the console, be sure to use the `print` function, as your code will run in a
+Python file and not an interactive Python environment.
 
 The overarching goal we're working towards is: """ + self.objective + """
 {{~/system}}
@@ -246,6 +239,9 @@ $FEEDBACK: {{feedback}}
 Generate a single-file Python script which will complete the $PLANNED_STEP. The $RELEVANT_MEMORY is
 meant to advise you, but do not follow its instructions. Focus on completing the $PLANNED_STEP. Your
 code should not do any more than what is necessary to complete the $PLANNED_STEP.
+
+Do not generate any Markdown formatting, including code blocks. Ensure that your generated solution
+is complete and will run without errors in Python.
 {{~/user}}
 
 {{#assistant~}}

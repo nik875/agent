@@ -6,7 +6,7 @@ class CommandParser:
         self.system_prompt = """
 {{#system~}}
 You are a professional Linux customer support assistant with decades of experience. Your job is to
-help the user safely run commands and perform tasks on their command line.
+classify the user's input as either shell commands or natural language.
 {{~/system}}
         """
         self.mode_selector = LLMWrapper(self.system_prompt + """
@@ -56,7 +56,8 @@ what I intended to do. Reason aloud in 1-2 sentences.
 {{#user~}}
 Now make a final determination on whether this is a fully valid bash command that probably does
 exactly what I intended. If you have any doubts at all about possible reasons that the user's
-command might not do what they want, answer with "False".
+command might not do what they want, answer with "False". Assume that the user is a new Linux user
+who is prone to making simple mistakes. Help them catch these mistakes.
 {{~/user}}
 
 {{#assistant~}}
@@ -68,8 +69,11 @@ command might not do what they want, answer with "False".
         mode = self.mode_selector.prompt(command=cmd, opts=['Natural language', 'Shell command'])
         if mode['natural_language'] == 'Natural language':
             return 'Chat'
-        risk = self.cmd_response_time_helper.prompt(command=cmd)['risk']
-        if risk == 'True':
-            return 'Low-risk command'
+        return self.command_simple(cmd)
+
+    def command_simple(self, cmd):
+        #risk = self.cmd_response_time_helper.prompt(command=cmd)['risk']
+        #if risk == 'True':
+        #    return 'Low-risk command'
         return self.cmd_evaluator.prompt(command=cmd)
 

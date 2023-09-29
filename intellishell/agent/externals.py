@@ -41,10 +41,6 @@ class ExternalHandler:
         self.working_directory = os.getcwd()
 
     def do(self, action):
-        if 'cd' in action:
-            arg = action[action.find('(')+1:action.find(')')]
-            self.working_directory = os.path.join(self.working_directory, arg)
-            return 'Directory change successful'
         path = os.path.join(self.working_directory, 'agent_action.py')
         with open(path, 'w') as f:
             f.write(action)

@@ -5,7 +5,7 @@ import subprocess
 import curses
 from parse import CommandParser
 from chatbot import Chatbot
-from agent.agent import Agent
+from agent.agent_simple import Agent
 
 
 def handle_backspace(response, stdscr):
@@ -59,7 +59,10 @@ class Shell:
             parts = cmd.split()
             if len(parts) > 1:
                 directory = parts[1]
-                os.chdir(directory)
+                if os.path.exists(directory) and os.path.isdir(directory):
+                    os.chdir(directory)
+                else:
+                    self.print(f"Directory {directory} not found!")
             return False
         if cmd == 'clear':
             self.stdscr.clear()
@@ -69,15 +72,16 @@ class Shell:
             curses.endwin()
             ag = Agent(prompt)
             ag.run()
-            curses.newwin()
+            input('Press enter to return to the shell...')
+            self.stdscr = curses.initscr()
             return False
-        parsed = self.parser.command(cmd)
-        if parsed == 'Chat':
+        if '?' in cmd:
             self.print(self.chatbot.ask(cmd))
             return False
+        parsed = self.parser.command_simple(cmd)
         if parsed != 'Low-risk command' and parsed['valid'] == 'False':
             self.print(parsed['reasoning'])
-            if self.input('Are you sure you want to execute? (y/n): ') != 'y':
+            if self.input('\nAre you sure you want to execute? (y/n): ') != 'y':
                 return False
         try:
             # pylint: disable=subprocess-popen-preexec-fn, global-statement
