@@ -5,9 +5,16 @@ typeset -g ORIGINAL_CMD=""
 # This flag indicates if the command should be suppressed
 typeset -g SUPPRESS_CMD=false
 
-_no_op() {
-
+_welcome_message() {
+    echo "Welcome to IntelliShell!"
+    echo -e "\nRun commands like you usually would (ls, cd Home, etc.)"
+    echo -e "\nChat with your personal Agent with ? (?Explain how the ls command works in Linux)"
+    echo -e "\nInstruct your agent to perform actions with : (:Make a file called test.txt)"
 }
+
+if (( ! ${precmd_functions[(Ie)_welcome_message]} )); then
+    precmd_functions+=(_welcome_message)
+fi
 
 # Redefine the accept-line widget to preprocess the command
 _preprocess_cmd_accept_line() {
