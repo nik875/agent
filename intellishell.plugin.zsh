@@ -23,6 +23,7 @@ _preprocess_cmd_accept_line() {
     intelli_out=$($cwd_pth/env/bin/python $cwd_pth/cmd.py "$cmd")
     exit_status=$?
 
+    echo "---------------------------"
     if [[ $exit_status -eq 0 ]]; then
         echo -e "$intelli_out"
         echo "Are you sure you want to execute? (Y/n): "
@@ -75,9 +76,6 @@ precmd() {
     if [[ -n "$PREPROCESSED_CMD" ]]; then
         eval "$PREPROCESSED_CMD"
         print -s $ORIGINAL_CMD
-        # Simulate the user input by printing the prompt and then the original command
-        echo -ne "$(print -P "$PS1")"
-        echo "$ORIGINAL_CMD"
         PREPROCESSED_CMD=""
         ORIGINAL_CMD=""
     fi
