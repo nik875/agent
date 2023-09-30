@@ -1,21 +1,5 @@
-# smartshell
+# IntelliShell
 
-To use, it's necessary to create a creds.py file inside of the `intellishell/agent` directory with the following content:
+An intelligent shell made for bioinformatics researchers. Operates as a plugin on top of oh-my-zsh.
 
-
-```python
-OPENAI_API_KEY = 'your-key-here'
-```
-
----
-
-To install, clone this repository into your oh-my-zsh plugins folder. Then create a virtual Python environment in the cloned repository called `env` and install these packages:
-
-- openai
-- tiktoken
-- scikit-learn
-- guidance
-- redis
-- redis-om
-
-Then add 'intellishell' to your list of oh-my-zsh plugins. Obviously it's necessary to install oh-my-zsh and zsh before using this shell plugin.
+To install, first install/configure zsh and oh-my-zsh. Then clone this repository into $HOME/.oh-my-zsh/custom/plugins, and add 'intellishell' to your list of plugins in .zshrc.
