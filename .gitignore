@@ -1,4 +1,4 @@
-agent/creds.py
-agent/agent_action.py
+intellishell/agent/creds.py
+intellishell/agent/agent_action.py
 **/__pycache__
 env
