@@ -1,7 +1,7 @@
 from collections import deque
 import openai
 import tiktoken
-from agent.creds import OPENAI_API_KEY
+from .agent.creds import OPENAI_API_KEY
 
 
 class Chatbot:

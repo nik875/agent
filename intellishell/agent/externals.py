@@ -1,4 +1,5 @@
 import os
+import sys
 import subprocess
 import urllib
 import requests
@@ -51,8 +52,15 @@ class ExternalHandler:
             text=True  # Ensure the output is in text format
         ) as process:
             stdout, stderr = process.communicate()
+        os.remove(path)
 
         # Combine stdout and stderr
-        output = f"stdout:\n{stdout}\n\nstderr:\n{stderr}"
+        output = f"{stdout}\n{stderr}"
         return output
+
+
+if __name__ == '__main__':
+    eh = ExternalHandler()
+    argv = sys.argv[1]
+    print(eh.do(argv))
 

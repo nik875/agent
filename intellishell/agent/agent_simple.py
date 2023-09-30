@@ -1,6 +1,6 @@
+import sys
 from .profiler import ProfilingModule
 from .action import ActionModule
-from .externals import ExternalHandler
 
 
 class Agent:
@@ -8,16 +8,17 @@ class Agent:
         self.objective = objective
         self.profiler_module = ProfilingModule(objective)
         self.action_module = ActionModule(self.profiler_module.action_profile())
-        self.system = ExternalHandler()
 
     def run(self):
         planned_action = self.action_module.execute(self.objective)
         if "```python" in planned_action:
             planned_action = planned_action[planned_action.find("```python")+len("```python"):]
             planned_action = planned_action[:planned_action.find("```")]
-        print(planned_action)
-        input('Press Enter to continue or ctrl+c to abort...')
-        result = self.system.do(planned_action)
-        print(result)
-        return result
+        return planned_action
+
+
+if __name__ == '__main__':
+    argv = sys.argv[1]
+    ag = Agent(argv)
+    print(ag.run())
 
