@@ -6,15 +6,13 @@ typeset -g ORIGINAL_CMD=""
 typeset -g SUPPRESS_CMD=false
 
 _welcome_message() {
-    echo "Welcome to IntelliShell!"
+    echo -e "\033[1;32mWelcome to IntelliShell!\033[0m"
     echo -e "\nRun commands like you usually would (ls, cd Home, etc.)"
     echo -e "\nChat with your personal Agent with ? (?Explain how the ls command works in Linux)"
     echo -e "\nInstruct your agent to perform actions with : (:Make a file called test.txt)"
 }
 
-if (( ! ${precmd_functions[(Ie)_welcome_message]} )); then
-    precmd_functions+=(_welcome_message)
-fi
+_welcome_message
 
 # Redefine the accept-line widget to preprocess the command
 _preprocess_cmd_accept_line() {
