@@ -13,11 +13,14 @@ class CmdHandler:
         if self.exit_code == 0:
             self.to_return = self.api.validate_command(cmd)
         elif self.exit_code == 1:
-            self.to_return = self.api.chat(cmd.lstrip('?'))
+            self.to_return = cmd.lstrip('?')
         elif self.exit_code == 2:
             self.to_return = self.api.gen_code(cmd.lstrip(':'))
         else:
             self.to_return = "Input type not implemented!"
+
+    def chat(self, hist):
+        self.to_return = self.api.chat(hist)
 
     def exit(self):
         print(self.to_return)
@@ -26,6 +29,9 @@ class CmdHandler:
 
 if __name__ == '__main__':
     handler = CmdHandler()
-    handler.handle(sys.argv[1])
+    if len(sys.argv) == 3 and sys.argv[1] == '--chat':
+        handler.chat(sys.argv[2])
+    else:
+        handler.handle(sys.argv[1])
     handler.exit()
 

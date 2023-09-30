@@ -1,3 +1,4 @@
+from collections import deque
 from intellishell.parse import CommandParser
 from intellishell.chatbot import Chatbot
 from intellishell.agent.agent_simple import Agent
@@ -21,14 +22,24 @@ class API:
             return 2
         return 0
 
+    def chat(self, hist: str) -> str:
+        """
+        Given a chat history, generate the next message.
+        """
+        messages = hist.split('!!!<>?')
+        parsed = [{'role': i[:i.find('\n')], 'content': i[i.find('\n')+1:]} for i in messages if i]
+        parsed = deque(parsed)
+        user_msg = parsed.pop()
+        bot = Chatbot(messages=parsed)
+        response = bot.ask(user_msg['content'])
+        hist += f'!!!<>?assistant\n{response}'
+        return hist
+
     def validate_command(self, cmd: str) -> str:
         """
         Returns an explanation of exactly what the provided command does.
         """
         return self.cmd_parser.command_simple(cmd)
-
-    def chat(self, cmd: str) -> str:
-        return self.chatbot.ask(cmd)
 
     def gen_code(self, cmd: str) -> str:
         """

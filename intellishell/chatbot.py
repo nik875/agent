@@ -1,3 +1,4 @@
+import sys
 from collections import deque
 import openai
 import tiktoken
@@ -5,14 +6,14 @@ from .agent.creds import OPENAI_API_KEY
 
 
 class Chatbot:
-    def __init__(self, max_tokens=4097):
+    def __init__(self, max_tokens=4097, messages=None):
         openai.api_key = OPENAI_API_KEY
         self.role = {'role': 'system', 'content': """
 You are a professional Linux sysadmin with decades of experience in customer support. Your job is to
 help the user perform tasks on their computer and answer their questions.
         """
 }
-        self.messages = deque([self.role])
+        self.messages = messages or deque([self.role])
         self.objective = None
         self.max_context_len = max_tokens
 
