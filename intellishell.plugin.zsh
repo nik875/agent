@@ -20,7 +20,7 @@ _preprocess_cmd_accept_line() {
     echo -e "\nThinking..."
 
     # Get output of cmd.py
-    intelli_out=$($cwd_pth/env/bin/python $cwd_pth/cmd.py "$cmd")
+    intelli_out=$(python3 $cwd_pth/cmd.py "$cmd")
     exit_status=$?
 
     echo "---------------------------"
@@ -38,7 +38,7 @@ _preprocess_cmd_accept_line() {
         fi
     elif [[ $exit_status -eq 1 ]]; then
         CUR_CHAT_HISTORY="$CUR_CHAT_HISTORY!!!<>?user"$'\n'"$cmd"
-        CUR_CHAT_HISTORY=$($cwd_pth/env/bin/python $cwd_pth/cmd.py --chat "$CUR_CHAT_HISTORY")
+        CUR_CHAT_HISTORY=$(python3 $cwd_pth/cmd.py --chat "$CUR_CHAT_HISTORY")
         parts=("${(@s/!!!<>?assistant/)CUR_CHAT_HISTORY}")
         last_part="${parts[-1]}"
         echo -e "$last_part"
@@ -53,7 +53,7 @@ _preprocess_cmd_accept_line() {
         if [[ "${should_exec:l}" != 'n' ]]; then
             echo "---------------------------"
             echo $intelli_out > .agent_action.py
-            output=$($cwd_pth/env/bin/python .agent_action.py)
+            output=$(python3 .agent_action.py)
             echo $output
             echo "---------------------------"
             echo "Code execution complete."

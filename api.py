@@ -1,50 +1,38 @@
-from collections import deque
-from intellishell.parse import CommandParser
-from intellishell.chatbot import Chatbot
-from intellishell.agent.agent_simple import Agent
-
+import http.client
+import json
 
 class API:
-    def __init__(self):
-        self.cmd_parser = CommandParser()
-        self.chatbot = Chatbot()
+    def __init__(self, host="127.0.0.1", port=8000):
+        self.host = host
+        self.port = port
+
+    def _send_request(self, endpoint, data):
+        conn = http.client.HTTPConnection(self.host, self.port)
+        headers = {'Content-Type': 'application/json'}
+        conn.request("POST", endpoint, json.dumps(data), headers)
+        response = conn.getresponse()
+        return json.loads(response.read().decode())
 
     def classify_command(self, cmd: str) -> int:
-        """
-        Classification codes:
-        0: Command
-        1: Chat message
-        2: Agent action
-        """
-        if cmd.startswith('?'):
-            return 1
-        elif cmd.startswith(':'):
-            return 2
-        return 0
+        data = self._send_request("/classify_command", {"cmd": cmd})
+        return data.get("classification")
 
     def chat(self, hist: str) -> str:
-        """
-        Given a chat history, generate the next message.
-        """
-        messages = hist.split('!!!<>?')
-        parsed = [{'role': i[:i.find('\n')], 'content': i[i.find('\n')+1:]} for i in messages if i]
-        parsed = deque(parsed)
-        user_msg = parsed.pop()
-        bot = Chatbot(messages=parsed)
-        response = bot.ask(user_msg['content'])
-        hist += f'!!!<>?assistant\n{response}'
-        return hist
+        data = self._send_request("/chat", {"hist": hist})
+        return data.get("chat_history")
 
     def validate_command(self, cmd: str) -> str:
-        """
-        Returns an explanation of exactly what the provided command does.
-        """
-        return self.cmd_parser.command_simple(cmd)
+        data = self._send_request("/validate_command", {"cmd": cmd})
+        return data.get("validation")
 
     def gen_code(self, cmd: str) -> str:
-        """
-        Generates and returns Python code that executes the given command.
-        """
-        ag = Agent(cmd)
-        return ag.run()
+        data = self._send_request("/gen_code", {"cmd": cmd})
+        return data.get("generated_code")
+
+# Usage
+if __name__ == '__main__':
+    api_client = API()
+    command = "?hello"
+    classification = api_client.classify_command(command)
+    print(f"The command '{command}' is of type: {classification}")
 
