@@ -49,7 +49,10 @@ _preprocess_cmd_accept_line() {
             BUFFER=""
             SUPPRESS_CMD=true
         else
-            SUPPRESS_CMD=false
+            PREPROCESSED_CMD=$cmd
+            ORIGINAL_CMD=$BUFFER
+            BUFFER=""
+            SUPPRESS_CMD=true
         fi
     elif [[ $exit_status -eq 1 ]]; then
         CUR_CHAT_HISTORY="$CUR_CHAT_HISTORY!!!<>?user"$'\n'"$cmd"
