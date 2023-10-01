@@ -2,12 +2,11 @@ import http.client
 import json
 
 class API:
-    def __init__(self, host="127.0.0.1", port=8000):
+    def __init__(self, host="intellishell.pythonanywhere.com"):
         self.host = host
-        self.port = port
 
     def _send_request(self, endpoint, data):
-        conn = http.client.HTTPConnection(self.host, self.port)
+        conn = http.client.HTTPSConnection(self.host)  # Use HTTPS
         headers = {'Content-Type': 'application/json'}
         conn.request("POST", endpoint, json.dumps(data), headers)
         response = conn.getresponse()
