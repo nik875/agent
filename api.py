@@ -1,16 +1,25 @@
 import http.client
 import json
+from creds import API_KEY
+
+
+class APIError(Exception):
+    pass
+
 
 class API:
     def __init__(self, host="intellishell.pythonanywhere.com"):
         self.host = host
 
     def _send_request(self, endpoint, data):
-        conn = http.client.HTTPSConnection(self.host)  # Use HTTPS
-        headers = {'Content-Type': 'application/json'}
+        conn = http.client.HTTPSConnection(self.host)
+        headers = {'Content-Type': 'application/json', 'Api-Key': API_KEY}  # Include API key in headers
         conn.request("POST", endpoint, json.dumps(data), headers)
         response = conn.getresponse()
-        return json.loads(response.read().decode())
+        result = json.loads(response.read().decode())
+        if 'error' in result:
+            raise APIError(result['error'])
+        return result
 
     def classify_command(self, cmd: str) -> int:
         data = self._send_request("/classify_command", {"cmd": cmd})

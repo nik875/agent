@@ -20,8 +20,18 @@ _preprocess_cmd_accept_line() {
     echo -e "\nThinking..."
 
     # Get output of cmd.py
-    intelli_out=$(python3 $cwd_pth/cmd.py "$cmd")
+    intelli_out=$(python3 $cwd_pth/cmd.py "$cmd" 2>&1 > >(cat -))
     exit_status=$?
+
+    if [[ $intelli_out == *"Traceback"* ]]; then
+        echo -e "\033[1;31mIntelliShell Error:\033[0m"
+        echo $intelli_out
+        echo "\033[1;31mFalling back to normal shell! (Disable IntelliShell with 'omz plugin disable intellishell')\033[0m"
+        echo "---------------------------"
+        SUPPRESS_CMD=false
+        zle .accept-line
+        return
+    fi
 
     echo "---------------------------"
     if [[ $exit_status -eq 0 ]]; then
