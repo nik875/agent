@@ -11,8 +11,8 @@ Now clone this repository into the plugins directory: `git clone https://github.
 Then go to the plugin directory: `cd ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/intellishell` and create a `creds.py` file with the following line:
 
 ```python
-API_KEY = 'YOUR_INTELLISHELL_API_KEY_HERE
-'```
+API_KEY = 'YOUR_INTELLISHELL_API_KEY_HERE'
+```
 
 Once this is done, edit the `~/.zshrc` configuration file, find the line that says `plugins=`, and add "intellishell" to the list. The list is whitespace separated. At a bare minimum, your line should look like this (if you have no other plugins)
 
