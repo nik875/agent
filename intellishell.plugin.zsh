@@ -15,12 +15,17 @@ echo -e "\nAsk me to perform actions with : (:Make a file called test.txt)"
 # Redefine the accept-line widget to preprocess the command
 _preprocess_cmd_accept_line() {
     local cwd_pth="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/intellishell"
+    if [[ $PYTHON_PATH ]]; then
+        python_pth=$PYTHON_PATH
+    else
+        python_pth="python3"
+    fi
     # Capture the current buffer (command)
     local cmd="$BUFFER"
     echo -e "\nThinking..."
 
     # Get output of cmd.py
-    intelli_out=$(python3 $cwd_pth/cmd.py "$cmd" 2>&1 > >(cat -))
+    intelli_out=$($python_pth $cwd_pth/cmd.py "$cmd" 2>&1 > >(cat -))
     exit_status=$?
 
     if [[ $intelli_out == *"Traceback"* ]]; then
@@ -48,7 +53,7 @@ _preprocess_cmd_accept_line() {
         fi
     elif [[ $exit_status -eq 1 ]]; then
         CUR_CHAT_HISTORY="$CUR_CHAT_HISTORY!!!<>?user"$'\n'"$cmd"
-        CUR_CHAT_HISTORY=$(python3 $cwd_pth/cmd.py --chat "$CUR_CHAT_HISTORY")
+        CUR_CHAT_HISTORY=$($python_pth $cwd_pth/cmd.py --chat "$CUR_CHAT_HISTORY")
         parts=("${(@s/!!!<>?assistant/)CUR_CHAT_HISTORY}")
         last_part="${parts[-1]}"
         echo -e "$last_part"
@@ -63,7 +68,7 @@ _preprocess_cmd_accept_line() {
         if [[ "${should_exec:l}" != 'n' ]]; then
             echo "---------------------------"
             echo $intelli_out > .agent_action.py
-            output=$(python3 .agent_action.py)
+            output=$($python_pth .agent_action.py)
             echo $output
             echo "---------------------------"
             echo "Code execution complete."
@@ -73,6 +78,8 @@ _preprocess_cmd_accept_line() {
         ORIGINAL_CMD=$BUFFER
         BUFFER=""
         SUPPRESS_CMD=true
+    else
+        echo "Invalid exit status! PYTHON_PATH could be incorrect."
     fi
 
     zle .accept-line  # Call the original accept-line widget

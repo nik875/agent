@@ -1,6 +1,6 @@
 # IntelliShell
 
-An intelligent shell made for bioinformatics researchers. Operates as a plugin on top of [oh-my-zsh](https://ohmyz.sh/#install).
+An intelligent shell made for bioinformatics researchers. Operates as a plugin on top of [oh-my-zsh](https://ohmyz.sh/#install). The only dependency is Python 3.8+.
 
 To install, first install/configure zsh and oh-my-zsh. To install zsh, run `sudo apt install zsh`, and then `chsh -s $(which zsh)` to set as default shell (change install command depending on your system's package manager). Don't worry about configuring anything when it asks, just leave it on the minimal .zshrc.
 
@@ -21,3 +21,9 @@ plugins=(intellishell)
 ```
 
 Now you're ready to start using IntelliShell! Simply run `omz reload` in your shell to reload all shell configuration. Then relax and have your first conversation with IntelliShell!
+
+---
+
+## Common Problems
+
+The plugin assumes that `python3` is the correct alias for Python 3.8. This may not be the case on every system, especially if you had to manually install an up-to-date Python version. To handle these cases, add the line `export PYTHON_PATH=path/to/your/installation` to your `.zshrc`.
