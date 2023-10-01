@@ -14,7 +14,7 @@ echo -e "\nAsk me to perform actions with : (:Make a file called test.txt)"
 
 # Redefine the accept-line widget to preprocess the command
 _preprocess_cmd_accept_line() {
-    local cwd_pth="$HOME/.oh-my-zsh/custom/plugins/intellishell"
+    local cwd_pth="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/intellishell"
     # Capture the current buffer (command)
     local cmd="$BUFFER"
     echo -e "\nThinking..."
