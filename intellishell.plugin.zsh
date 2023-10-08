@@ -11,6 +11,7 @@ echo -e "\033[1;32mHi, I'm IntelliShell!\033[0m"
 echo -e "\nRun commands like you usually would (ls, cd Home, etc.)"
 echo -e "\nTalk to me with ? (?Explain how the ls command works in Linux)"
 echo -e "\nAsk me to perform actions with : (:Make a file called test.txt)"
+echo -e "\nSet \$DISABLE_CMDCHK to stop checking every command"
 
 # Redefine the accept-line widget to preprocess the command
 _preprocess_cmd_accept_line() {
@@ -22,7 +23,7 @@ _preprocess_cmd_accept_line() {
     fi
     # Capture the current buffer (command)
     local cmd="$BUFFER"
-    echo -e "\nThinking..."
+    echo ""
 
     # Get output of cmd.py
     intelli_out=$($python_pth $cwd_pth/cmd.py "$cmd" 2>&1 > >(cat -))
@@ -38,11 +39,14 @@ _preprocess_cmd_accept_line() {
         return
     fi
 
-    echo "---------------------------"
     if [[ $exit_status -eq 0 ]]; then
-        echo -e "$intelli_out"
-        echo "Are you sure you want to execute? (Y/n): "
-        read should_exec < /dev/tty
+        if [[ -z $DISABLE_CMDCHK ]]; then
+            echo -e "$intelli_out"
+            echo "Are you sure you want to execute? (Y/n): "
+            read should_exec < /dev/tty
+        else
+            should_exec='y'
+        fi
         if [[ "${should_exec:l}" == 'n' ]]; then
             PREPROCESSED_CMD="echo"
             ORIGINAL_CMD=$BUFFER
@@ -50,7 +54,7 @@ _preprocess_cmd_accept_line() {
             SUPPRESS_CMD=true
         else
             PREPROCESSED_CMD=$cmd
-            ORIGINAL_CMD=$BUFFER
+            ORIGINAL_CMD=$cmd
             BUFFER=""
             SUPPRESS_CMD=true
         fi
