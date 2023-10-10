@@ -11,7 +11,7 @@ echo -e "\033[1;32mHi, I'm IntelliShell!\033[0m"
 echo -e "\nRun commands like you usually would (ls, cd Home, etc.)"
 echo -e "\nTalk to me with ? (?Explain how the ls command works in Linux)"
 echo -e "\nAsk me to perform actions with : (:Make a file called test.txt)"
-echo -e "\nSet \$DISABLE_CMDCHK to stop checking every command"
+echo -e "\nSet \$DISABLE_CMDCHK to 'true' to stop checking every command"
 
 # Redefine the accept-line widget to preprocess the command
 _preprocess_cmd_accept_line() {
@@ -40,7 +40,7 @@ _preprocess_cmd_accept_line() {
     fi
 
     if [[ $exit_status -eq 0 ]]; then
-        if [[ -z $DISABLE_CMDCHK ]]; then
+        if [[ $DISABLE_CMDCHK != 'true' ]]; then
             echo -e "$intelli_out"
             echo "Are you sure you want to execute? (Y/n): "
             read should_exec < /dev/tty

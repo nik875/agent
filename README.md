@@ -1,6 +1,6 @@
 # IntelliShell
 
-An intelligent shell made for bioinformatics researchers. Operates as a plugin on top of [oh-my-zsh](https://ohmyz.sh/#install). The only dependency is Python 3.8+.
+An intelligent shell made for scientific and academic researchers. Operates as a plugin on top of [oh-my-zsh](https://ohmyz.sh/#install). The only dependency is Python 3.8+.
 
 To install, first install/configure zsh and oh-my-zsh. To install zsh, run `sudo apt install zsh`, and then `chsh -s $(which zsh)` to set as default shell (change install command depending on your system's package manager). Don't worry about configuring anything when it asks, just leave it on the minimal .zshrc.
 
