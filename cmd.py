@@ -12,7 +12,7 @@ class CmdHandler:
     def handle(self, cmd):
         self.exit_code = self.api.classify_command(cmd)
         if self.exit_code == 0:
-            self.to_return = self.api.validate_command(cmd) if not os.environ['DISABLE_CMDCHK'] \
+            self.to_return = self.api.validate_command(cmd) if 'DISABLE_CMDCHK' not in os.environ \
                 else 'Validation disabled!'
         elif self.exit_code == 1:
             self.to_return = cmd.lstrip('?')
