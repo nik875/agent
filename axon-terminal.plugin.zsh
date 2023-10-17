@@ -8,14 +8,14 @@ typeset -g SUPPRESS_CMD=false
 typeset -g CUR_CHAT_HISTORY=""
 
 echo -e "\033[1;32mHi, I'm Axon!\033[0m"
-echo -e "\nRun commands like you usually would (ls, cd Home, etc.)"
-echo -e "\nTalk to me with ? (?Explain how the ls command works in Linux)"
-echo -e "\nAsk me to perform actions with : (:Make a file called test.txt)"
-echo -e "\nSet \$DISABLE_CMDCHK to 'true' to stop checking every command"
+echo -e "Run commands like you usually would (ls, cd Home, etc.)"
+echo -e "Talk to me with ? (?Explain how the ls command works in Linux)"
+echo -e "Ask me to perform actions with : (:Make a file called test.txt)"
+echo -e "Set \$DISABLE_CMDCHK to 'true' to stop checking every command"
 
 # Redefine the accept-line widget to preprocess the command
 _preprocess_cmd_accept_line() {
-    local cwd_pth="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/axon"
+    local cwd_pth="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/axon-terminal"
     if [[ $PYTHON_PATH ]]; then
         python_pth=$PYTHON_PATH
     else
@@ -32,7 +32,7 @@ _preprocess_cmd_accept_line() {
     if [[ $intelli_out == *"Traceback"* ]]; then
         echo -e "\033[1;31mAxon Error:\033[0m"
         echo $intelli_out
-        echo "\033[1;31mFalling back to normal shell! (Disable Axon with 'omz plugin disable axon')\033[0m"
+        echo "\033[1;31mFalling back to normal shell! (Disable Axon with 'omz plugin disable axon-terminal')\033[0m"
         echo "---------------------------"
         SUPPRESS_CMD=false
         zle .accept-line
