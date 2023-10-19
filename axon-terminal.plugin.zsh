@@ -21,6 +21,12 @@ _preprocess_cmd_accept_line() {
     else
         python_pth="python3"
     fi
+
+    if [[ $ENABLE_CMDCHK != 'true' ]] || [[ ! $BUFFER =~ ^\? && ! $BUFFER =~ ^: ]]; then
+        SUPPRESS_CMD=false
+        zle .accept-line
+        return
+    fi
     # Capture the current buffer (command)
     local cmd="$BUFFER"
     echo ""
