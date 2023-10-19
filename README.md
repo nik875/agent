@@ -14,13 +14,7 @@ Then go to the plugin directory: `cd ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/
 API_KEY = 'YOUR_INTELLISHELL_API_KEY_HERE'
 ```
 
-Once this is done, edit the `~/.zshrc` configuration file, find the line that says `plugins=`, and add "intellishell" to the list. The list is whitespace separated. At a bare minimum, your line should look like this (if you have no other plugins)
-
-```zsh
-plugins=(intellishell)
-```
-
-Now you're ready to start using IntelliShell! Simply run `omz reload` in your shell to reload all shell configuration. Then relax and have your first conversation with IntelliShell!
+Once this is done, simply run `omz plugin enable axon-terminal` and you're ready to go!
 
 ---
 
