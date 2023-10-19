@@ -1,4 +1,4 @@
-# IntelliShell
+# Axon Terminal
 
 An intelligent shell made for scientific and academic researchers. Operates as a plugin on top of [oh-my-zsh](https://ohmyz.sh/#install). The only dependency is Python 3.8+.
 
@@ -6,9 +6,9 @@ To install, first install/configure zsh and oh-my-zsh. To install zsh, run `sudo
 
 Once zsh is installed, install oh-my-zsh with the following command: `sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"`. The website has other install methods, including through wget instead of curl.
 
-Now clone this repository into the plugins directory: `git clone https://github.com/nik875/intellishell ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/intellishell`.
+Now clone this repository into the plugins directory: `git clone https://github.com/nik875/axon-terminal ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/axon-terminal`.
 
-Then go to the plugin directory: `cd ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/intellishell` and create a `creds.py` file with the following line:
+Then go to the plugin directory: `cd ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/axon-terminal` and create a `creds.py` file with the following line:
 
 ```python
 API_KEY = 'YOUR_INTELLISHELL_API_KEY_HERE'
