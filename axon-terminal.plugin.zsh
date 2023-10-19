@@ -11,7 +11,7 @@ echo -e "\033[1;32mHi, I'm Axon!\033[0m"
 echo -e "Run commands like you usually would (ls, cd Home, etc.)"
 echo -e "Talk to me with ? (?Explain how the ls command works in Linux)"
 echo -e "Ask me to perform actions with : (:Make a file called test.txt)"
-echo -e "Set \$DISABLE_CMDCHK to 'true' to stop checking every command"
+echo -e "Set \$ENABLE_CMDCHK to 'true' to check your commands before you run them"
 
 # Redefine the accept-line widget to preprocess the command
 _preprocess_cmd_accept_line() {
@@ -40,7 +40,7 @@ _preprocess_cmd_accept_line() {
     fi
 
     if [[ $exit_status -eq 0 ]]; then
-        if [[ $DISABLE_CMDCHK != 'true' ]]; then
+        if [[ $ENABLE_CMDCHK == 'true' ]]; then
             echo -e "$intelli_out"
             echo "Are you sure you want to execute? (Y/n): "
             read should_exec < /dev/tty
