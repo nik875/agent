@@ -32,14 +32,12 @@ _preprocess_cmd_accept_line() {
         python_pth="python3"
     fi
 
-    case "$BUFFER" in
-        "?"*|":"* ) 
-          :
-          ;;
-      *)
-        SUPPRESS_CMD=false
-        zle .accept-line
-        return
+    case "$BUFFER" in "?"*|":"* ) :;; *)
+        if [[ $ENABLE_CMDCHK != 'true' ]]; then
+            SUPPRESS_CMD=false
+            zle .accept-line
+            return
+        fi
         ;;
     esac
 
