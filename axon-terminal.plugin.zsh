@@ -7,11 +7,21 @@ typeset -g SUPPRESS_CMD=false
 # This var stores the current chat history
 typeset -g CUR_CHAT_HISTORY=""
 
-echo -e "\033[1;32mHi, I'm Axon!\033[0m"
-echo -e "Run commands like you usually would (ls, cd Home, etc.)"
-echo -e "Talk to me with ? (?Explain how the ls command works in Linux)"
-echo -e "Ask me to perform actions with : (:Make a file called test.txt)"
-echo -e "Set \$ENABLE_CMDCHK to 'true' to check your commands before you run them"
+set_axon_api_key() {
+    creds_file="${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/axon-terminal/creds.py"
+    if [[ ! -f $creds_file ]]; then
+        echo "Enter Axon Terminal API Key: "
+        read api_key
+        echo "API_KEY = '$api_key'" > $creds_file
+
+        echo -e "\033[1;32mHi, I'm Axon!\033[0m"
+        echo -e "Run commands like you usually would (ls, cd Home, etc.)"
+        echo -e "Talk to me with ? (?Explain how the ls command works in Linux)"
+        echo -e "Ask me to perform actions with : (:Make a file called test.txt)"
+        echo -e "Set \$ENABLE_CMDCHK to 'true' to check your commands before you run them"
+    fi
+}
+set_axon_api_key
 
 # Redefine the accept-line widget to preprocess the command
 _preprocess_cmd_accept_line() {
@@ -22,14 +32,12 @@ _preprocess_cmd_accept_line() {
         python_pth="python3"
     fi
 
-    case "$BUFFER" in
-        "?"*|":"* ) 
-          :
-          ;;
-      *)
-        SUPPRESS_CMD=false
-        zle .accept-line
-        return
+    case "$BUFFER" in "?"*|":"* ) :;; *)
+        if [[ $ENABLE_CMDCHK != 'true' ]] || [[ $BUFFER == "" ]]; then
+            SUPPRESS_CMD=false
+            zle .accept-line
+            return
+        fi
         ;;
     esac
 
