@@ -4,14 +4,16 @@ typeset -g PREPROCESSED_CMD=""
 typeset -g ORIGINAL_CMD=""
 # This flag indicates if the command should be suppressed
 typeset -g SUPPRESS_CMD=false
-# This var stores the current chat history
-typeset -g CUR_CHAT_HISTORY=""
+
 typeset -g SESS_ID=""
 typeset -g DISABLE_AXON=false
 typeset -g DEBUG=false
-typeset -g cwd_path="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/axon-terminal"
+typeset -g CWD_PATH="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/axon-terminal"
 
-local git_response=$(git -C $cwd_path pull)
+alias disable-axon="export DISABLE_AXON=true && echo 'Axon Terminal disabled.'"
+alias enable-axon="export DISABLE_AXON=false && echo 'Axon Terminal enabled.'"
+
+local git_response=$(git -C $CWD_PATH pull)
 if [[ $git_response == *"Already up to date."* ]]; then :; else echo "Axon Terminal Updated!"; fi
 
 _err() {
@@ -40,7 +42,7 @@ set_axon_api_key() {
     else
         python_path="python3"
     fi
-    SESS_ID=$($python_path $cwd_path/cmd.py session_start)
+    SESS_ID=$($python_path $CWD_PATH/cmd.py session_start)
     if [[ $? -ne 0 ]]; then
         _err $SESS_ID
         SESS_ID="No Session ID"
@@ -73,7 +75,7 @@ _preprocess_cmd_accept_line() {
 
     if [[ $BUFFER == "?"* ]]; then
         # Calls cmd.py on given buffer with first character removed
-        response=$($python_path $cwd_path/cmd.py "chat" $SESS_ID ${BUFFER[2,${#BUFFER}]})
+        response=$($python_path $CWD_PATH/cmd.py "chat" $SESS_ID ${BUFFER[2,${#BUFFER}]})
         if [[ $? -ne 0 ]]; then
             _err $response
             DISABLE_AXON=true
@@ -82,7 +84,7 @@ _preprocess_cmd_accept_line() {
         echo -e $response
     elif [[ $BUFFER == ":"* ]]; then
         # Calls cmd.py on given buffer with first character removed
-        response=$($python_path $cwd_path/cmd.py "generate" $SESS_ID ${BUFFER[2,${#BUFFER}]})
+        response=$($python_path $CWD_PATH/cmd.py "generate" $SESS_ID ${BUFFER[2,${#BUFFER}]})
         if [[ $? -ne 0 ]]; then
             _err $response
             DISABLE_AXON=true
@@ -96,7 +98,7 @@ _preprocess_cmd_accept_line() {
             echo $response > .agent_action.py
             output=$($python_path .agent_action.py)
             # Send back result of code execution
-            $python_path $cwd_path/cmd.py "output" $SESS_ID ${BUFFER[2,${#BUFFER}]}
+            $python_path $CWD_PATH/cmd.py "output" $SESS_ID ${BUFFER[2,${#BUFFER}]}
             echo $output
             echo "---------------------------"
             echo "Code execution complete."
@@ -104,7 +106,7 @@ _preprocess_cmd_accept_line() {
         fi
     else  # If the command doesn't start with either ? or :, just run as a command
         SUPPRESS_CMD=false
-        response=$($python_path $cwd_path/cmd.py "command" $SESS_ID "$BUFFER")
+        response=$($python_path $CWD_PATH/cmd.py "command" $SESS_ID "$BUFFER")
         if [[ $? -ne 0 ]]; then
             _err $response
             DISABLE_AXON=true
