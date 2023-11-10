@@ -6,6 +6,7 @@ typeset -g ORIGINAL_CMD=""
 typeset -g SUPPRESS_CMD=false
 # This var stores the current chat history
 typeset -g CUR_CHAT_HISTORY=""
+typeset -g SESS_ID=""
 
 set_axon_api_key() {
     creds_file="${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/axon-terminal/creds.py"
@@ -20,95 +21,61 @@ set_axon_api_key() {
         echo -e "Ask me to perform actions with : (:Make a file called test.txt)"
         echo -e "Set \$ENABLE_CMDCHK to 'true' to check your commands before you run them"
     fi
+    local cwd_path="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/axon-terminal"
+    if [[ $PYTHON_PATH ]]; then
+        python_path=$PYTHON_PATH
+    else
+        python_path="python3"
+    fi
+    SESS_ID="$($python_path $cwd_path/cmd.py session_start)"
 }
 set_axon_api_key
 
+_suppress_cmd() {
+    PREPROCESSED_CMD="echo"
+    ORIGINAL_CMD=$BUFFER
+    BUFFER=""
+    SUPPRESS_CMD=true
+}
+
 # Redefine the accept-line widget to preprocess the command
 _preprocess_cmd_accept_line() {
-    local cwd_pth="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/axon-terminal"
+    local cwd_path="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/axon-terminal"
     if [[ $PYTHON_PATH ]]; then
-        python_pth=$PYTHON_PATH
+        python_path=$PYTHON_PATH
     else
-        python_pth="python3"
+        python_path="python3"
     fi
+    
+    echo ""  # Prevent overwriting of current line
 
-    case "$BUFFER" in "?"*|":"* ) :;; *)
-        if [[ $ENABLE_CMDCHK != 'true' ]] || [[ $BUFFER == "" ]]; then
-            SUPPRESS_CMD=false
-            zle .accept-line
-            return
-        fi
-        ;;
-    esac
-
-    # Capture the current buffer (command)
-    local cmd="$BUFFER"
-    echo ""
-
-    # Get output of cmd.py
-    intelli_out=$($python_pth $cwd_pth/cmd.py "$cmd" 2>&1 > >(cat -))
-    exit_status=$?
-
-    if [[ $intelli_out == *"Traceback"* ]]; then
-        echo -e "\033[1;31mAxon Error:\033[0m"
-        echo $intelli_out
-        echo "\033[1;31mFalling back to normal shell! (Disable Axon with 'omz plugin disable axon-terminal')\033[0m"
-        echo "---------------------------"
-        SUPPRESS_CMD=false
-        zle .accept-line
-        return
-    fi
-
-    if [[ $exit_status -eq 0 ]]; then
-        if [[ $ENABLE_CMDCHK == 'true' ]]; then
-            echo -e "$intelli_out"
-            echo "Are you sure you want to execute? (Y/n): "
-            read should_exec < /dev/tty
-        else
-            should_exec='y'
-        fi
-        if [[ "${should_exec:l}" == 'n' ]]; then
-            PREPROCESSED_CMD="echo"
-            ORIGINAL_CMD=$BUFFER
-            BUFFER=""
-            SUPPRESS_CMD=true
-        else
-            PREPROCESSED_CMD=$cmd
-            ORIGINAL_CMD=$cmd
-            BUFFER=""
-            SUPPRESS_CMD=true
-        fi
-    elif [[ $exit_status -eq 1 ]]; then
-        CUR_CHAT_HISTORY="$CUR_CHAT_HISTORY!!!<>?user"$'\n'"$cmd"
-        CUR_CHAT_HISTORY=$($python_pth $cwd_pth/cmd.py --chat "$CUR_CHAT_HISTORY")
-        parts=("${(@s/!!!<>?assistant/)CUR_CHAT_HISTORY}")
-        last_part="${parts[-1]}"
-        echo -e "$last_part"
-        PREPROCESSED_CMD="echo"
-        ORIGINAL_CMD=$BUFFER
-        BUFFER=""
-        SUPPRESS_CMD=true
-    elif [[ $exit_status -eq 2 ]]; then
-        echo -e "$intelli_out\n\n---------------------------"
+    if [[ $BUFFER == "?"* ]]; then
+        # Calls cmd.py on given buffer with first character removed
+        response=$($python_path $cwd_path/cmd.py "chat" $SESS_ID ${BUFFER[2,${#BUFFER}]})
+        echo -e $response
+    elif [[ $BUFFER == ":"* ]]; then
+        # Calls cmd.py on given buffer with first character removed
+        response=$($python_path $cwd_path/cmd.py "generate" $SESS_ID ${BUFFER[2,${#BUFFER}]})
+        echo -e "$response\n\n---------------------------"
         echo "This code is the planned action. Are you sure you want to execute? (Y/n): "
         read should_exec < /dev/tty
         if [[ "${should_exec:l}" != 'n' ]]; then
             echo "---------------------------"
-            echo $intelli_out > .agent_action.py
-            output=$($python_pth .agent_action.py)
-            echo $output
+            echo $response > .agent_action.py
+            output=$($python_path .agent_action.py)
+            echo $output  # TODO: send back result of code execution
             echo "---------------------------"
             echo "Code execution complete."
             rm .agent_action.py
         fi
-        PREPROCESSED_CMD="echo"
-        ORIGINAL_CMD=$BUFFER
-        BUFFER=""
-        SUPPRESS_CMD=true
-    else
-        echo "Invalid exit status! PYTHON_PATH could be incorrect."
+    else  # If the command doesn't start with either ? or :, just run as a command
+        SUPPRESS_CMD=false
+        $python_path $cwd_path/cmd.py "command" $SESS_ID "$BUFFER"
+        zle .accept-line
+        return
     fi
 
+    _suppress_cmd  # Assuming it wasn't just a command, suppress it so that it doesn't run
     zle .accept-line  # Call the original accept-line widget
 }
 

@@ -1,39 +1,29 @@
 import sys
-import os
 from api import API
 
 
 class CmdHandler:
-    def __init__(self):
-        self.api = API()
+    def __init__(self, sess_id=''):
+        self.api = API(sess_id)
         self.to_return = ''
         self.exit_code = 0
 
-    def handle(self, cmd):
-        self.exit_code = self.api.classify_command(cmd)
-        if self.exit_code == 0:
-            self.to_return = self.api.validate_command(cmd) if 'DISABLE_CMDCHK' not in os.environ \
-                or os.environ['DISABLE_CMDCHK'] != 'true' else 'Validation disabled!'
-        elif self.exit_code == 1:
-            self.to_return = cmd.lstrip('?')
-        elif self.exit_code == 2:
-            self.to_return = self.api.gen_code(cmd.lstrip(':'))
-        else:
-            self.to_return = "Input type not implemented!"
-
-    def chat(self, hist):
-        self.to_return = self.api.chat(hist)
+    def handle(self, endpoint, cmd):
+        self.to_return = self.api.endpoints[endpoint]({'request': cmd})
 
     def exit(self):
-        print(self.to_return)
+        if self.to_return:
+            print(self.to_return)
         sys.exit(self.exit_code)
 
 
 if __name__ == '__main__':
-    handler = CmdHandler()
-    if len(sys.argv) == 3 and sys.argv[1] == '--chat':
-        handler.chat(sys.argv[2])
-    else:
-        handler.handle(sys.argv[1])
+    if len(sys.argv) == 2:
+        api = API()
+        result = api.session_start()
+        print(result)
+        sys.exit(0)
+    handler = CmdHandler(sys.argv[2])
+    handler.handle(sys.argv[1], sys.argv[3])
     handler.exit()
 

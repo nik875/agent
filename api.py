@@ -8,39 +8,46 @@ class APIError(Exception):
 
 
 class API:
-    def __init__(self, host="intellishell.pythonanywhere.com"):
+    FUNCS = [
+        'command',
+        'chat',
+        'generate',
+        'debug',
+        'session_end'
+    ]
+    #def __init__(self, host="intellishell.pythonanywhere.com"):
+    def __init__(self, sess_id='', host="127.0.0.1", port=5000):
         self.host = host
+        self.port = port
+        self.sess_id = sess_id
+        def endpoint_func(endpoint):
+            def func(req: str):
+                return self._send_request(f"/{endpoint}", {'request': req})
+            return func
+        self.endpoints = {i:endpoint_func(i) for i in self.FUNCS}
 
     def _send_request(self, endpoint, data):
-        conn = http.client.HTTPSConnection(self.host)
-        headers = {'Content-Type': 'application/json', 'Api-Key': API_KEY}  # Include API key in headers
+        conn = http.client.HTTPConnection(self.host, self.port)
+        # Include API key in headers
+        headers = {'Content-Type': 'application/json',
+                   'Api-Key': API_KEY}
+        data['sess_id'] = self.sess_id
         conn.request("POST", endpoint, json.dumps(data), headers)
         response = conn.getresponse()
         result = json.loads(response.read().decode())
         if 'error' in result:
             raise APIError(result['error'])
-        return result
+        return result['response'] if 'response' in result else None
 
-    def classify_command(self, cmd: str) -> int:
-        data = self._send_request("/classify_command", {"cmd": cmd})
-        return data.get("classification")
-
-    def chat(self, hist: str) -> str:
-        data = self._send_request("/chat", {"hist": hist})
-        return data.get("chat_history")
-
-    def validate_command(self, cmd: str) -> str:
-        data = self._send_request("/validate_command", {"cmd": cmd})
-        return data.get("validation")
-
-    def gen_code(self, cmd: str) -> str:
-        data = self._send_request("/gen_code", {"cmd": cmd})
-        return data.get("generated_code")
-
-# Usage
-if __name__ == '__main__':
-    api_client = API()
-    command = "?hello"
-    classification = api_client.classify_command(command)
-    print(f"The command '{command}' is of type: {classification}")
+    def session_start(self):
+        conn = http.client.HTTPConnection(self.host, self.port)
+        # Include API key in headers
+        headers = {'Content-Type': 'application/json',
+                   'Api-Key': API_KEY}
+        conn.request("POST", '/session_start', json.dumps({}), headers)
+        response = conn.getresponse()
+        result = json.loads(response.read().decode())
+        if 'error' in result:
+            raise APIError(result['error'])
+        return result['response']
 
