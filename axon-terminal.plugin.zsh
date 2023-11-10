@@ -9,6 +9,10 @@ typeset -g CUR_CHAT_HISTORY=""
 typeset -g SESS_ID=""
 typeset -g DISABLE_AXON=false
 typeset -g DEBUG=false
+typeset -g cwd_path="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/axon-terminal"
+
+local git_response=$(git -C $cwd_path pull)
+if [[ $git_response == *"Already up to date."* ]]; then :; else echo "Axon Terminal Updated!"; fi
 
 _err() {
     echo -e "\033[1;31mAxon Error:\033[0m"
@@ -31,7 +35,6 @@ set_axon_api_key() {
         echo -e "Ask me to perform actions with : (:Make a file called test.txt)"
         echo -e "Set \$ENABLE_CMDCHK to 'true' to check your commands before you run them"
     fi
-    local cwd_path="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/axon-terminal"
     if [[ $PYTHON_PATH ]]; then
         python_path=$PYTHON_PATH
     else
@@ -60,7 +63,6 @@ _preprocess_cmd_accept_line() {
         zle .accept-line
         return
     fi
-    local cwd_path="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/axon-terminal"
     if [[ $PYTHON_PATH ]]; then
         python_path=$PYTHON_PATH
     else
