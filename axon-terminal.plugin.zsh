@@ -8,11 +8,14 @@ typeset -g SUPPRESS_CMD=false
 typeset -g CUR_CHAT_HISTORY=""
 typeset -g SESS_ID=""
 typeset -g DISABLE_AXON=false
+typeset -g DEBUG=false
 
 _err() {
     echo -e "\033[1;31mAxon Error:\033[0m"
     echo "SERVER COMMUNICATION FAILED, FALLING BACK TO NORMAL SHELL"
-    echo $1
+    if [[ $DEBUG == true ]]; then
+        echo $1
+    fi
 }
 
 set_axon_api_key() {
@@ -34,7 +37,7 @@ set_axon_api_key() {
     else
         python_path="python3"
     fi
-    SESS_ID=$($python_path $cwd_path/cmd.py session_start 2>/dev/null)
+    SESS_ID=$($python_path $cwd_path/cmd.py session_start)
     if [[ $? -ne 0 ]]; then
         _err $SESS_ID
         SESS_ID="No Session ID"
