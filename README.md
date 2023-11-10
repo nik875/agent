@@ -13,7 +13,7 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/too
 Now clone this repository into the plugins directory:
 
 ```zsh
-git clone https://github.com/nik875/axon-terminal ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/axon-terminal
+git clone --depth 1 https://github.com/nik875/axon-terminal ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/axon-terminal
 ```
 
 Once this is done, simply run `omz plugin enable axon-terminal` to finish installation. On the first run, you will be asked for an API key. Currently this project is in alpha release, so contact me for a key if you want to give Axon a try.
