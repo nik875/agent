@@ -7,6 +7,13 @@ typeset -g SUPPRESS_CMD=false
 # This var stores the current chat history
 typeset -g CUR_CHAT_HISTORY=""
 typeset -g SESS_ID=""
+typeset -g DISABLE_AXON=false
+
+_err() {
+    echo -e "\033[1;31mAxon Error:\033[0m"
+    echo "SERVER COMMUNICATION FAILED, FALLING BACK TO NORMAL SHELL"
+    echo $1
+}
 
 set_axon_api_key() {
     creds_file="${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/axon-terminal/creds.py"
@@ -27,12 +34,17 @@ set_axon_api_key() {
     else
         python_path="python3"
     fi
-    SESS_ID="$($python_path $cwd_path/cmd.py session_start)"
+    SESS_ID=$($python_path $cwd_path/cmd.py session_start 2>/dev/null)
+    if [[ $? -ne 0 ]]; then
+        _err $SESS_ID
+        SESS_ID="No Session ID"
+        DISABLE_AXON=true
+    fi
 }
 set_axon_api_key
 
 _suppress_cmd() {
-    PREPROCESSED_CMD="echo"
+    PREPROCESSED_CMD=":"
     ORIGINAL_CMD=$BUFFER
     BUFFER=""
     SUPPRESS_CMD=true
@@ -40,6 +52,11 @@ _suppress_cmd() {
 
 # Redefine the accept-line widget to preprocess the command
 _preprocess_cmd_accept_line() {
+    if [[ $DISABLE_AXON == true ]]; then
+        SUPPRESS_CMD=false
+        zle .accept-line
+        return
+    fi
     local cwd_path="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/axon-terminal"
     if [[ $PYTHON_PATH ]]; then
         python_path=$PYTHON_PATH
@@ -52,10 +69,20 @@ _preprocess_cmd_accept_line() {
     if [[ $BUFFER == "?"* ]]; then
         # Calls cmd.py on given buffer with first character removed
         response=$($python_path $cwd_path/cmd.py "chat" $SESS_ID ${BUFFER[2,${#BUFFER}]})
+        if [[ $? -ne 0 ]]; then
+            _err $response
+            DISABLE_AXON=true
+            return
+        fi
         echo -e $response
     elif [[ $BUFFER == ":"* ]]; then
         # Calls cmd.py on given buffer with first character removed
         response=$($python_path $cwd_path/cmd.py "generate" $SESS_ID ${BUFFER[2,${#BUFFER}]})
+        if [[ $? -ne 0 ]]; then
+            _err $response
+            DISABLE_AXON=true
+            return
+        fi
         echo -e "$response\n\n---------------------------"
         echo "This code is the planned action. Are you sure you want to execute? (Y/n): "
         read should_exec < /dev/tty
@@ -63,14 +90,20 @@ _preprocess_cmd_accept_line() {
             echo "---------------------------"
             echo $response > .agent_action.py
             output=$($python_path .agent_action.py)
-            echo $output  # TODO: send back result of code execution
+            # Send back result of code execution
+            $python_path $cwd_path/cmd.py "output" $SESS_ID ${BUFFER[2,${#BUFFER}]}
+            echo $output
             echo "---------------------------"
             echo "Code execution complete."
             rm .agent_action.py
         fi
     else  # If the command doesn't start with either ? or :, just run as a command
         SUPPRESS_CMD=false
-        $python_path $cwd_path/cmd.py "command" $SESS_ID "$BUFFER"
+        response=$($python_path $cwd_path/cmd.py "command" $SESS_ID "$BUFFER")
+        if [[ $? -ne 0 ]]; then
+            _err $response
+            DISABLE_AXON=true
+        fi
         zle .accept-line
         return
     fi

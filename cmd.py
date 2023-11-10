@@ -1,5 +1,6 @@
 import sys
-from api import API
+import traceback
+from api import API, APIError
 
 
 class CmdHandler:
@@ -9,7 +10,15 @@ class CmdHandler:
         self.exit_code = 0
 
     def handle(self, endpoint, cmd):
-        self.to_return = self.api.endpoints[endpoint]({'request': cmd})
+        try:
+            self.to_return = self.api.endpoints[endpoint]({'request': cmd})
+        except APIError:
+            self.exit_code = 1
+            self.to_return = traceback.format_exc()
+        # pylint: disable=broad-exception-caught
+        except Exception:
+            self.exit_code = 2
+            self.to_return = traceback.format_exc()
 
     def exit(self):
         if self.to_return:
