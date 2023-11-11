@@ -75,7 +75,7 @@ _preprocess_cmd_accept_line() {
 
     if [[ $BUFFER == "?"* ]]; then
         # Calls cmd.py on given buffer with first character removed
-        response=$($python_path $CWD_PATH/cmd.py "chat" $SESS_ID ${BUFFER[2,${#BUFFER}]})
+        response=$($python_path $CWD_PATH/cmd.py "chat" $SESS_ID "CHAT: ${BUFFER[2,${#BUFFER}]}")
         if [[ $? -ne 0 ]]; then
             _err $response
             DISABLE_AXON=true
@@ -84,7 +84,7 @@ _preprocess_cmd_accept_line() {
         echo -e $response
     elif [[ $BUFFER == ":"* ]]; then
         # Calls cmd.py on given buffer with first character removed
-        response=$($python_path $CWD_PATH/cmd.py "generate" $SESS_ID ${BUFFER[2,${#BUFFER}]})
+        response=$($python_path $CWD_PATH/cmd.py "generate" $SESS_ID "GENERATE: ${BUFFER[2,${#BUFFER}]}")
         if [[ $? -ne 0 ]]; then
             _err $response
             DISABLE_AXON=true
@@ -111,7 +111,7 @@ _preprocess_cmd_accept_line() {
         fi
     else  # If the command doesn't start with either ? or :, just run as a command
         SUPPRESS_CMD=false
-        response=$($python_path $CWD_PATH/cmd.py "command" $SESS_ID "$BUFFER")
+        response=$($python_path $CWD_PATH/cmd.py "command" $SESS_ID "COMMAND: $BUFFER")
         if [[ $? -ne 0 ]]; then
             _err $response
             DISABLE_AXON=true
