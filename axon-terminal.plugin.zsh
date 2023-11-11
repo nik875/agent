@@ -98,7 +98,7 @@ _preprocess_cmd_accept_line() {
             echo $response > .agent_action.py
             output=$($python_path .agent_action.py)
             # Send back result of code execution
-            response=$($python_path $CWD_PATH/cmd.py "output" $SESS_ID $output)
+            response=$($python_path $CWD_PATH/cmd.py "output" $SESS_ID "OUTPUT: $output")
             if [[ $? -ne 0 ]]; then
                 _err $response
                 DISABLE_AXON=true
